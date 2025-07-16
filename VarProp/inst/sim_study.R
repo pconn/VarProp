@@ -1,8 +1,11 @@
+library(fields)
+library(mrds)
+library(dsm)
+library(ggplot2)
 
 #function to generate two correlated, spatially autocorrelated
 #covariates using a co-regionalization model
 gen_2_covs <- function(n_x,n_y,B1=0.5) {
-  library(fields)
   #First, generate two independent spatial processes
   Locs = expand.grid(y=c(1:n_y),x=c(1:n_x))-0.5  #locations of gridded centroids
   Cov_exp = fields::Exp.cov(Locs,Locs,aRange=5)
@@ -32,8 +35,6 @@ rqpois <- function(n, mu, theta) {
 }
 
 #400 grid cells, each 2 x 2 (so half-width can be 1)
-library(mrds)
-library(dsm)
 n_sim=1000
 n_boot = 1000
 n_x = 25
@@ -258,8 +259,6 @@ save.image('sim_results_psp.RData')
 # P_df = data.frame(covdet=Cov_array[isim,,2],size=1)
 # Plot_df$P = predict(sim_ddf,newdata=P_df)[[1]]
 # 
-# library(ggplot2)
-# library(viridis)
 # ggplot(Plot_df)+geom_tile(aes(x=x,y=y,fill=P))+scale_fill_viridis()
 # ggplot(Plot_df)+geom_tile(aes(x=x,y=y,fill=Ests_sp))+scale_fill_viridis_c()
 # ggplot(Plot_df)+geom_tile(aes(x=x,y=y,fill=Ests_sp_k8))+scale_fill_viridis_c()
@@ -299,8 +298,6 @@ for(i in 1:7){
   CV_mod_list[[i]]=predict(gam_cv,newdata=new_data,type="response")
 }
 
-library(ggplot2)
-library(viridis)
 Plot_df = data.frame("Correlation"=rep(Cor_pred,7),
                      "Coverage"=unlist(Cov_mod_list),
                      "Procedure"=c(rep("k=5,delta",n_pred),rep("delta",n_pred),
@@ -314,8 +311,6 @@ ggplot(Plot_df)+geom_line(aes(x=Correlation,y=Coverage,color=Procedure),size=1.5
   scale_color_viridis(discrete=TRUE)
 dev.off()
 
-library(ggplot2)
-library(viridis)
 Plot_df = data.frame("Correlation"=rep(Cor_pred,7),
                      "CV"=unlist(CV_mod_list),
                      "Procedure"=c(rep("k=5,delta",n_pred),rep("delta",n_pred),
