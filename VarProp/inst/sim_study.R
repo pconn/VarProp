@@ -212,25 +212,37 @@ for(isim in 1:n_sim){
   # Cur_est = predict(my_gam,newdata=pred_df[Which_no_sample,],type="response")
   # var_est = Cur_est %*% Vp %*% Cur_est #vector of derivatives for exp transformation is just the estimates
   # cv_est = sqrt(var_est)/sum(Cur_est)
+
+
+  # only need to setup basis/penalties once!
+    # setup count model
+    Count_df$off.set = 1#log(P_boot)+log(4) # p * area on real scale
+    gam_boot_G = gam(count~offset(off.set)+te(x,y,k=8),family="quasipoisson",
+                   data=Count_df,method="REML", fit=FALSE)
+    # HT model
+    Count_df$ht = Count_df$count#/P_boot
+    Count_df$off.set = log(4)
+    gam_boot_ht_G = gam(ht~offset(off.set)+te(x,y,k=8),family="quasipoisson",
+                   data=Count_df,method="REML", fit=FALSE)
+
   for(iboot in 1:n_boot){
     Beta_boot = rmvnorm(1,Beta_hat,VC_hat)
     Sigma_boot = exp(Beta_boot[1]+Beta_boot[2]*Cov_array[isim,Sampled,2])
     P_boot = (pnorm(Ones_boot,Zeros_boot,Sigma_boot)-0.5)/
       dnorm(Zeros_boot,Zeros_boot,Sigma_boot)
     if(any(Sigma_boot>1000000000))P_boot[which(Sigma_boot>1000000000)]=1.0 #numerical issues here
-    
+
     # count model
-    Count_df$off.set = log(P_boot)+log(4) # p * area on real scale
-    gam_boot = gam(count~offset(off.set)+te(x,y,k=8),family="quasipoisson",
-                   data=Count_df,method="REML")
+    gam_boot_G$offset = log(P_boot)+log(4) # p * area on real scale
+    gam_boot = gam(method="REML", G=gam_boot_G)
+
     gam_pred = predict(gam_boot,newdata=pred_df[Which_no_sample,],type="response")
     N_boot[iboot]=sum(gam_pred)
-    
+
     #H-T model
-    Count_df$ht = Count_df$count/P_boot
-    Count_df$off.set = log(4)
-    gam_boot = gam(ht~offset(off.set)+te(x,y,k=8),family="quasipoisson",
-                   data=Count_df,method="REML")
+    gam_boot_ht_G$y = Count_df$count/P_boot
+    gam_boot = gam(method="REML", G=gam_boot_ht_G)
+
     gam_pred = predict(gam_boot,newdata=pred_df[Which_no_sample,],type="response")
     N_boot_ht[iboot]=sum(gam_pred)
   }
