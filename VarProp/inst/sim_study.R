@@ -34,7 +34,7 @@ rqpois <- function(n, mu, theta) {
   rnbinom(n = n, mu = mu, size = mu/(theta-1))
 }
 
-#400 grid cells, each 2 x 2 (so half-width can be 1)
+# 625 grid cells, each 2 x 2 (so half-width can be 1)
 n_sim=1000
 n_boot = 1000
 n_x = 25
