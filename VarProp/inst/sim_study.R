@@ -57,6 +57,21 @@ preddata$area = 4
 pred_df=preddata
 pred_df$off.set=log(preddata$area)
 
+# show bug in prediction grid
+#  plotseg <- segdata
+#  plotseg$xmin <- plotseg$x - plotseg$Effort/2
+#  plotseg$xmax <- plotseg$x + plotseg$Effort/2
+#  plotseg$ymin <- plotseg$y - plotseg$Effort/2
+#  plotseg$ymax <- plotseg$y + plotseg$Effort/2
+#
+#  ggplot(plotseg) +
+#    geom_point(aes(x=x, y=y)) +
+#    geom_segment(aes(x=xmin, xend=xmax, y=y)) +
+#    geom_segment(aes(y=ymin, yend=ymax, x=x)) +
+#    geom_point(aes(x=x, y=y), data=preddata, colour="red") +
+#    theme_minimal()
+
+
 Sampled_xy=expand.grid(y=c(1,4,7,10,13,16,19,22,25),x=c(1,4,7,10,13,16,19,22,25))
 Sampled = (Sampled_xy$x-1)*25+Sampled_xy$y  #vector index
 
@@ -117,7 +132,7 @@ for(isim in 1:n_sim){
   pred_det <- predict(sim_ddf,newdata=segdata)$fitted
   wts_pinv <- 1/(pred_det)
   wts_pinv = wts_pinv/mean(wts_pinv)  #make weights sum to n
-  
+
   # dsm_flat <- dsm(count~1, ddf.obj=sim_ddf, 
   #                 segment.data=segdata, observation.data=obsdata, 
   #                 method="REML")
